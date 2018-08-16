@@ -25,3 +25,12 @@ npm test     # run lint + unit tests
 | -------------- | ----------------------------- | ------------------------------------------------------------------------------------------ |
 | GET /block/:id | id: number                    | { hash: string, height: number, body: string, time: timestamp, previousBlockHash: string } |
 | POST /block    | body (JSON): { body: string } | { hash: string, height: number, body: string, time: timestamp, previousBlockHash: string } |
+
+### curl commands to test
+
+```bash
+# GET /block/0
+curl "http://localhost:8000/block/0"
+# POST /block
+curl -X "POST" "http://localhost:8000/block" -H 'Content-Type: application/json' -d $'{"body":"awesome test body"}'
+```
