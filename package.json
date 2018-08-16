@@ -1,0 +1,61 @@
+{
+  "name": "blockchain_service_web_api",
+  "version": "0.1.0",
+  "description": "Blockchain Web service API built",
+  "engines": {
+    "node": "8.11.3",
+    "npm": "5.6.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node app/index.js",
+    "lint": "eslint app; exit 0",
+    "test": "npm run lint"
+  },
+  "keywords": [
+    "Blockchain",
+    "Node.js",
+    "Javascript"
+  ],
+  "author": "Yuichi Hagio",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.18.3",
+    "compression": "1.7.3",
+    "crypto-js": "3.1.9-1",
+    "express": "4.16.3",
+    "helmet": "3.13.0",
+    "level": "4.0.0"
+  },
+  "devDependencies": {
+    "eslint": "5.3.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-plugin-import": "2.14.0",
+    "prettier": "1.14.2"
+  },
+  "eslintConfig": {
+    "extends": "airbnb-base",
+    "env": {
+      "es6": true,
+      "browser": true,
+      "mocha": true
+    },
+    "rules": {
+      "comma-dangle": [
+        "warn",
+        "never"
+      ],
+      "no-unused-vars": [
+        "warn"
+      ]
+    }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "bracketSpacing": true,
+    "arrowParens": "avoid",
+    "tabWidth": 2,
+    "semi": true
+  }
+}
