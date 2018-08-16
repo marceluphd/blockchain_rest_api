@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/yhagio/blockchain_rest_api.svg?branch=master)](https://travis-ci.org/yhagio/blockchain_rest_api)
+
 # Blockchain Web Service REST API
 
 ### How to set up
