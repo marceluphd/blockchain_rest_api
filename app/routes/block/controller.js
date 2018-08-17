@@ -88,8 +88,6 @@ async function validateBlock(req, res) {
  * @apiName ValidateBlockchain
  * @apiGroup Block
  *
- * @apiParam {Number} id Block height (key).
- *
  * @apiSuccess {Object} result Result of validation of the blockchain
  * @apiSuccess {Boolean} result.isValid If the blockchain is valid or not
  */
