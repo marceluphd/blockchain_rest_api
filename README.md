@@ -26,13 +26,14 @@ npm test     # run lint + unit tests
 
 ### Available API endpoints
 
-| Endpoint                | Params format                 | Returning JSON on success                                                                  |
-| ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------------ |
-| GET /block/:id          | id: number                    | { hash: string, height: number, body: string, time: timestamp, previousBlockHash: string } |
-| POST /block             | body (JSON): { body: string } | { hash: string, height: number, body: string, time: timestamp, previousBlockHash: string } |
-| GET /block/validate_all | N/A                           | { isValid: boolean }                                                                       |
-| GET /block/validate/:id | id: number                    | { isValid: boolean }                                                                       |
-| GET /block/height       | N/A                           | { blockHeight: number }                                                                    |
+| Endpoint                | Params format                 | Returning JSON on success                                                                    |
+| ----------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- |
+| GET /block/:id          | id: number                    | { hash: string, height: number, body: string, time: timestamp, previousBlockHash: string }   |
+| GET /block/all          | N/A                           | [{ hash: string, height: number, body: string, time: timestamp, previousBlockHash: string }] |
+| GET /block/validate_all | N/A                           | { isValid: boolean }                                                                         |
+| GET /block/validate/:id | id: number                    | { isValid: boolean }                                                                         |
+| GET /block/height       | N/A                           | { blockHeight: number }                                                                      |
+| POST /block             | body (JSON): { body: string } | { hash: string, height: number, body: string, time: timestamp, previousBlockHash: string }   |
 
 ### curl commands to test
 
@@ -47,4 +48,6 @@ curl "http://localhost:8000/block/validate/1"
 curl "http://localhost:8000/block/validate_all"
 # GET /block/height - Get the blockchain height
 curl "http://localhost:8000/block/height"
+# GET /block/all - Get the whole blockchain
+curl "http://localhost:8000/block/all"
 ```
