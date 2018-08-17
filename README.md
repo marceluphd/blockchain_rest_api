@@ -36,8 +36,8 @@ npm test     # run lint + unit tests
 curl "http://localhost:8000/block/0"
 # POST /block
 curl -X "POST" "http://localhost:8000/block" -H 'Content-Type: application/json' -d $'{"body":"awesome test body"}'
-# GET /block/validate/2 - Validate the block at height 2
-curl "http://localhost:8000/block/validate/2"
+# GET /block/validate/1 - Validate the block at height 1
+curl "http://localhost:8000/block/validate/1"
 # GET /block/validate_all - Validate the whole blockchain
 curl "http://localhost:8000/block/validate_all"
 # GET /block/height - Get the blockchain height
