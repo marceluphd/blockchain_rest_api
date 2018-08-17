@@ -5,7 +5,7 @@ const routes = require('./routes/routes');
 
 require('./config/middlewares')(app);
 
-app.use('/', routes);
+app.use(routes);
 
 app.use((err, req, res) =>
   res.status(500).send({
