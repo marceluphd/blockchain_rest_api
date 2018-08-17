@@ -14,7 +14,6 @@ blockchain
   })
   .then(allBlocks => {
     console.log(`Current block height: ${allBlocks.length - 1}`);
-    blockchain.chain = allBlocks;
     app.listen(config.port, () => {
       console.log('Sever started localhost:%s', config.port);
     });
