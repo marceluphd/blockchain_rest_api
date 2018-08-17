@@ -1,5 +1,19 @@
 const Blockchain = require('../../models/blockchain');
 
+/**
+ * @api {get} /block/:id Request a blcok information
+ * @apiName GetBlock
+ * @apiGroup Block
+ *
+ * @apiParam {Number} id Block height (key).
+ *
+ * @apiSuccess {Object} block Block information
+ * @apiSuccess {String} block.hash Block hash
+ * @apiSuccess {String} block.previousBlockHash Previous block's hash
+ * @apiSuccess {Number} block.height Block height
+ * @apiSuccess {String} block.body Block body string
+ * @apiSuccess {Timestamp} block.time Block's timestamp of creation
+ */
 async function getBlock(req, res) {
   const { id } = req.params;
 
@@ -15,6 +29,20 @@ async function getBlock(req, res) {
   }
 }
 
+/**
+ * @api {post} /block/ Add a block to the blockchain
+ * @apiName AddBlock
+ * @apiGroup Block
+ *
+ * @apiParam {String} body Block's body string
+ *
+ * @apiSuccess {Object} block Block information
+ * @apiSuccess {String} block.hash Block hash
+ * @apiSuccess {String} block.previousBlockHash Previous block's hash
+ * @apiSuccess {Number} block.height Block height
+ * @apiSuccess {String} block.body Block body string
+ * @apiSuccess {Timestamp} block.time Block's timestamp of creation
+ */
 async function addBlock(req, res) {
   const { body } = req.body;
 
@@ -30,6 +58,16 @@ async function addBlock(req, res) {
   }
 }
 
+/**
+ * @api {get} /block/validate/:id Validate a block
+ * @apiName ValidateBlock
+ * @apiGroup Block
+ *
+ * @apiParam {Number} id Block height (key).
+ *
+ * @apiSuccess {Object} block Result of validation of a block
+ * @apiSuccess {Boolean} block.isValid If the block is valid or not
+ */
 async function validateBlock(req, res) {
   const { id } = req.params;
 
@@ -45,6 +83,16 @@ async function validateBlock(req, res) {
   }
 }
 
+/**
+ * @api {get} /block/validate_all Validate the blockchain
+ * @apiName ValidateBlockchain
+ * @apiGroup Block
+ *
+ * @apiParam {Number} id Block height (key).
+ *
+ * @apiSuccess {Object} result Result of validation of the blockchain
+ * @apiSuccess {Boolean} result.isValid If the blockchain is valid or not
+ */
 async function validateBlockchain(req, res) {
   try {
     const result = await Blockchain.validateBlockchain();
@@ -54,6 +102,14 @@ async function validateBlockchain(req, res) {
   }
 }
 
+/**
+ * @api {get} /block/height Request the blockchain's block height
+ * @apiName GetBlockHeight
+ * @apiGroup Block
+ *
+ * @apiSuccess {Object} result Result
+ * @apiSuccess {Number} result.blockHeight Block height
+ */
 async function getBlockHeight(req, res) {
   try {
     const blockHeight = await Blockchain.getBlockHeight();
