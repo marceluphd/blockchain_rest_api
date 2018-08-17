@@ -2,6 +2,11 @@
 
 # Blockchain Web Service REST API
 
+### Built with
+
+- [Express](https://github.com/expressjs/express)
+- [LevelDB](https://github.com/Level/level)
+
 ### How to set up
 
 Clone this repo and get in.
