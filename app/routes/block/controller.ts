@@ -1,4 +1,5 @@
-const Blockchain = require('../../models/blockchain');
+import { Request, Response } from 'express';
+import Blockchain from '../../models/blockchain';
 
 /**
  * @api {get} /block/:id Request a blcok information
@@ -14,7 +15,7 @@ const Blockchain = require('../../models/blockchain');
  * @apiSuccess {String}    block.body              Block body string
  * @apiSuccess {Timestamp} block.time              Block's timestamp of creation
  */
-async function getBlock(req, res) {
+async function getBlock(req: Request, res: Response) {
   const { id } = req.params;
 
   if (id === undefined) {
@@ -48,7 +49,7 @@ async function getBlock(req, res) {
  * @apiSuccess {String}    block.body              Block body string
  * @apiSuccess {Timestamp} block.time              Block's timestamp of creation
  */
-async function addBlock(req, res) {
+async function addBlock(req: Request, res: Response) {
   const { body } = req.body;
 
   if (!body) {
@@ -73,7 +74,7 @@ async function addBlock(req, res) {
  * @apiSuccess {Object}  block         Result of validation of a block
  * @apiSuccess {Boolean} block.isValid If the block is valid or not
  */
-async function validateBlock(req, res) {
+async function validateBlock(req: Request, res: Response) {
   const { id } = req.params;
 
   if (id === undefined) {
@@ -96,7 +97,7 @@ async function validateBlock(req, res) {
  * @apiSuccess {Object}  result         Result of validation of the blockchain
  * @apiSuccess {Boolean} result.isValid If the blockchain is valid or not
  */
-async function validateBlockchain(req, res) {
+async function validateBlockchain(_req: Request, res: Response) {
   try {
     const result = await Blockchain.validateBlockchain();
     return res.status(200).send(result);
@@ -113,7 +114,7 @@ async function validateBlockchain(req, res) {
  * @apiSuccess {Object} result             Result
  * @apiSuccess {Number} result.blockHeight Block height
  */
-async function getBlockHeight(req, res) {
+async function getBlockHeight(_req: Request, res: Response) {
   try {
     const blockHeight = await Blockchain.getBlockHeight();
     return res.status(200).send({ blockHeight });
@@ -135,7 +136,7 @@ async function getBlockHeight(req, res) {
  * @apiSuccess {String}    blocks.body              Block body string
  * @apiSuccess {Timestamp} blocks.time              Block's timestamp of creation
  */
-async function getAllBlocks(req, res) {
+async function getAllBlocks(_req: Request, res: Response) {
   try {
     const allBlocks = await Blockchain.getAllBlocks();
     return res.status(200).send(allBlocks);
@@ -144,7 +145,7 @@ async function getAllBlocks(req, res) {
   }
 }
 
-module.exports = {
+export default {
   addBlock,
   getBlock,
   validateBlock,

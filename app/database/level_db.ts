@@ -1,10 +1,13 @@
-const SHA256 = require('crypto-js/sha256');
+import SHA256 = require('crypto-js/sha256');
 
-const Block = require('../models/block');
-const db = require('./connect').connect();
+import Block from '../models/block';
+import db from './connect';
 
-async function getAllBlocksFromDB(blockHeight) {
-  const blocks = [];
+import { IBlock } from '../utils/block_schema';
+import { IError } from '../utils/error_schema';
+
+async function getAllBlocksFromDB(blockHeight: IBlock['height']) {
+  const blocks: string[] = [];
   for (let i = 0; blockHeight > i; i++) {
     const data = await db.get(i);
     const block = JSON.parse(data);
@@ -18,12 +21,12 @@ function getAllBlocks() {
   return new Promise((resolve, reject) => {
     db.createReadStream()
       .on('data', () => blockHeight++)
-      .on('error', err => reject(err))
+      .on('error', (err: IError) => reject(err))
       .on('close', () => resolve(getAllBlocksFromDB(blockHeight)));
   });
 }
 
-async function addBlockToDB(blockHeight, blockData) {
+async function addBlockToDB(blockHeight: IBlock['height'], blockData: IBlock) {
   const block = blockData;
   block.height = blockHeight;
   block.time = new Date()
@@ -41,8 +44,8 @@ async function addBlockToDB(blockHeight, blockData) {
   return new Promise((resolve, reject) => {
     db.put(blockHeight, JSON.stringify(block))
       .then(() => db.get(blockHeight))
-      .then(data => resolve(JSON.parse(data)))
-      .catch(err => reject(err));
+      .then((data: string) => resolve(JSON.parse(data)))
+      .catch((err: IError) => reject(err));
   });
 }
 
@@ -50,7 +53,7 @@ function addGenesisBlock() {
   return addBlockToDB(0, new Block('First block in the chain - Genesis block'));
 }
 
-async function getBlock(key) {
+async function getBlock(key: IBlock['height']) {
   try {
     const block = await db.get(key);
     return JSON.parse(block);
@@ -59,19 +62,19 @@ async function getBlock(key) {
   }
 }
 
-function getBlockHeight() {
+function getBlockHeight(): Promise<number> {
   let blockHeight = -1;
   return new Promise((resolve, reject) => {
     db.createReadStream()
       .on('data', () => blockHeight++)
-      .on('error', err => reject(err))
+      .on('error', (err: IError) => reject(err))
       .on('close', () => resolve(blockHeight));
   });
 }
 
-async function addBlock(body) {
+async function addBlock(body: IBlock['body']) {
   try {
-    const currentBlockHeight = await getBlockHeight();
+    const currentBlockHeight: number = await getBlockHeight();
     const block = new Block(body);
     return addBlockToDB(currentBlockHeight + 1, block);
   } catch (err) {
@@ -79,7 +82,7 @@ async function addBlock(body) {
   }
 }
 
-async function validateBlock(blockHeight) {
+async function validateBlock(blockHeight: IBlock['height']) {
   try {
     const block = await getBlock(blockHeight);
     const blockHash = block.hash;
@@ -91,8 +94,8 @@ async function validateBlock(blockHeight) {
   }
 }
 
-async function validateAllBlocks(blockHeight) {
-  const errors = [];
+async function validateAllBlocks(blockHeight: IBlock['height']) {
+  const errors: number[] = [];
   try {
     for (let height = 0; blockHeight > height; height++) {
       if (!(await validateBlock(height))) {
@@ -115,12 +118,12 @@ function validateBlockchain() {
   return new Promise((resolve, reject) => {
     db.createReadStream()
       .on('data', () => blockHeight++)
-      .on('error', err => reject(err))
+      .on('error', (err: IError) => reject(err))
       .on('close', () => resolve(validateAllBlocks(blockHeight)));
   });
 }
 
-module.exports = {
+export default {
   getBlockHeight,
   getBlock,
   validateBlockchain,

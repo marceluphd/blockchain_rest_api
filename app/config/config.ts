@@ -1,4 +1,5 @@
 const config = {
+  env: '',
   dev: 'development',
   test: 'test',
   staging: 'staging',
@@ -9,4 +10,4 @@ const config = {
 process.env.NODE_ENV = process.env.NODE_ENV || config.dev;
 config.env = process.env.NODE_ENV;
 
-module.exports = config;
+export default config;
