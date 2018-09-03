@@ -1,5 +1,5 @@
 const Blockchain = require('../../models/blockchain');
-const Request = require('../../models/validation');
+const Validation = require('../../models/validation');
 
 /**
  * @api {post} /block Add a star registry into blockchain
@@ -34,18 +34,26 @@ async function addStar(req, res) {
 
   // Check if this address is allowed to register
   try {
-    const request = await Request.getRequest(address);
+    const request = await Validation.getRequest(address);
     if (!request.registerStar || !request.status || !request.status.messageSignature) {
       return res.status(403).send({
         note: 'Your are not allowed to register a star. Please validate address first.'
       });
     }
   } catch (err) {
+    if (/key not found/i.test(err.message)) {
+      return res.status(403).send({
+        note: 'Your are not allowed to register a star. Please validate address first.'
+      });
+    }
     return res.status(500).send({ error: 'Something went wrong' });
   }
 
   try {
     const newBlock = await Blockchain.addBlock({ address, star });
+    // Once a star is registered, clear validation request to reset the
+    // validation to be secure (Users have to validate each time to add a star).
+    await Validation.deleteRequest(address);
     return res.status(200).send(newBlock);
   } catch (err) {
     return res.status(500).send({ error: 'Something went wrong.' });

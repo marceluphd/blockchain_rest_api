@@ -156,6 +156,10 @@ async function validateMsgSig(req, res) {
     }
   };
 
+  if (!verified) {
+    return res.status(200).send(updatedValidationInfo);
+  }
+
   // Save the validated request
   await Validation.saveUpdatedRequest(updatedValidationInfo);
 
