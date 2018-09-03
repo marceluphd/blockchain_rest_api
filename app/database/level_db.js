@@ -19,20 +19,19 @@ async function getAllBlocksFromDB(blockHeight) {
 }
 
 function getByAddress(address) {
-  let foundBlock;
+  const foundBlocks = [];
   return new Promise((resolve, reject) => {
     db.createReadStream()
       .on('data', (data) => {
         if (data && data.value) {
           const block = JSON.parse(data.value);
           if (block && block.body && block.body.address === address) {
-            foundBlock = block;
-            resolve(foundBlock);
+            foundBlocks.push(block);
           }
         }
       })
       .on('error', err => reject(err))
-      .on('close', () => resolve(foundBlock));
+      .on('close', () => resolve(foundBlocks));
   });
 }
 

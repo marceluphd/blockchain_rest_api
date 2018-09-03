@@ -25,18 +25,42 @@ async function validateRequest(req, res) {
     return res.status(500).send('Wallet address is required.');
   }
 
+  // If the request is already there, reduce the remaining time
+  let requestFound;
   try {
-    const request = await Validation.getRequest(address);
-    if (request.registerStar && request.status && request.status.messageSignature) {
+    requestFound = await Validation.getRequest(address);
+    if (requestFound) {
+      // If already verified, no need to verify it again and ready to register
+      // stars already.
+      if (requestFound.registerStar &&
+        requestFound.status &&
+        requestFound.status.messageSignature) {
+        return res.status(200).send({
+          info: 'Your address is already verified.'
+        });
+      }
+
+      // If the request is already expired, remove it and warn the user
+      const now = generateTimestamp();
+      const remainingTime = 300 - (now - requestFound.requestTimeStamp);
+      if (remainingTime <= 0) {
+        await Validation.deleteRequest(address);
+        return res.status(400).send({
+          error: 'Request is expired. Please request again to start the validation.'
+        });
+      }
+
+      // If not expired yet, show the remaining time til it expires
       return res.status(200).send({
-        note: 'Your address is already verified. You are allowed to register a star.'
+        ...requestFound,
+        validationWindow: remainingTime
       });
     }
   } catch (err) {
     // 'key not dound' is not error for this case since no validation record
     // is found, which is the starting state to initiate validation.
     if (!/key not found/i.test(err.message)) {
-      return res.status(500).send({ error: err ? err.message : 'Could not process.' });
+      return res.status(400).send({ error: err ? err.message : 'Could not process.' });
     }
   }
 
@@ -92,7 +116,7 @@ async function validateMsgSig(req, res) {
   try {
     request = await Validation.getRequest(address);
     if (!request) {
-      return res.status(404).send({ error: 'Request is not found.' });
+      return res.status(404).send({ error: 'Validation request is not found.' });
     }
 
     // If 5 mins passes since validation request, it expires
@@ -100,7 +124,7 @@ async function validateMsgSig(req, res) {
     if (timePassed > 300) {
       await Validation.deleteRequest(address);
       return res.status(400).send({
-        error: 'Request is expired already. Please request to validate again /requestValidation'
+        error: 'Request is expired. Please request to validate again.'
       });
     }
 
@@ -109,6 +133,9 @@ async function validateMsgSig(req, res) {
       return res.status(200).send(request);
     }
   } catch (e) {
+    if (/key not found/i.test(e.message)) {
+      return res.status(400).send({ error: 'Validation request is not found.' });
+    }
     return res.status(500).send({ error: e ? e.message : 'Could not process.' });
   }
 
@@ -129,7 +156,7 @@ async function validateMsgSig(req, res) {
     }
   };
 
-  // Update the response object
+  // Save the validated request
   await Validation.saveUpdatedRequest(updatedValidationInfo);
 
   return res.status(200).send(updatedValidationInfo);

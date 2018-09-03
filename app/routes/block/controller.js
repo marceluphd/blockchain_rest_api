@@ -44,18 +44,6 @@ async function addStar(req, res) {
     return res.status(500).send({ error: 'Something went wrong' });
   }
 
-  // Check if this address is already used to register a star
-  try {
-    const block = await Blockchain.getByAddress(address);
-    if (block) {
-      return res.status(403).send({
-        note: 'Address is already used to register a star.'
-      });
-    }
-  } catch (err) {
-    return res.status(500).send({ error: 'Something went wrong.' });
-  }
-
   try {
     const newBlock = await Blockchain.addBlock({ address, star });
     return res.status(200).send(newBlock);

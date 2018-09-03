@@ -47,7 +47,8 @@ async function getByHash(req, res) {
  *
  * @apiParam {String}      address                      Wallet address
  *
- * @apiSuccess {Object}    block                        Block information
+ * @apiSuccess {Object[]}  block[]                      Array of blocks
+ *
  * @apiSuccess {String}    block.hash                   Block hash
  * @apiSuccess {String}    block.previousBlockHash      Previous block's hash
  * @apiSuccess {Number}    block.height                 Block height
@@ -68,9 +69,13 @@ async function getByAddress(req, res) {
   }
 
   try {
-    const block = await Blockchain.getByAddress(address);
-    if (!block) return res.status(404).send({ error: `Block (address: ${address}) is not found.` });
-    return res.status(200).send(block);
+    const blocks = await Blockchain.getByAddress(address);
+    if (!blocks.length) {
+      return res.status(404).send({
+        error: `Block (address: ${address}) is not found.`
+      });
+    }
+    return res.status(200).send(blocks);
   } catch (err) {
     if (/key not found/i.test(err.message)) {
       return res.status(404).send({ error: `Block (address: ${address}) is not found.` });
