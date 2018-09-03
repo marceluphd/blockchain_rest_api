@@ -1,5 +1,9 @@
-const Blockchain = require('../../models/blockchain');
-const Validation = require('../../models/validation');
+import { Request, Response } from 'express';
+
+import Blockchain from '../../models/blockchain';
+import Validation from '../../models/validation';
+import { IBlock } from '../../utils/block_schema';
+import { IValidatedRequest } from '../../utils/validation_schema';
 
 /**
  * @api {post} /block Add a star registry into blockchain
@@ -25,7 +29,7 @@ const Validation = require('../../models/validation');
  * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
  * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function addStar(req, res) {
+async function addStar(req: Request, res: Response): Promise<IBlock | any> {
   const { address, star } = req.body;
 
   if (!address || !star) {
@@ -34,7 +38,7 @@ async function addStar(req, res) {
 
   // Check if this address is allowed to register
   try {
-    const request = await Validation.getRequest(address);
+    const request: IValidatedRequest = await Validation.getRequest(address);
     if (!request.registerStar || !request.status || !request.status.messageSignature) {
       return res.status(403).send({
         note: 'Your are not allowed to register a star. Please validate address first.'
@@ -80,7 +84,7 @@ async function addStar(req, res) {
  * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
  * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function getByHeight(req, res) {
+async function getByHeight(req: Request, res: Response): Promise<IBlock | any> {
   const { height } = req.params;
 
   if (height === undefined) {
@@ -109,7 +113,7 @@ async function getByHeight(req, res) {
  * @apiSuccess {Object}  block         Result of validation of a block
  * @apiSuccess {Boolean} block.isValid If the block is valid or not
  */
-async function validateBlock(req, res) {
+async function validateBlock(req: Request, res: Response): Promise<any> {
   const { id } = req.params;
 
   if (id === undefined) {
@@ -132,7 +136,7 @@ async function validateBlock(req, res) {
  * @apiSuccess {Object}  result         Result of validation of the blockchain
  * @apiSuccess {Boolean} result.isValid If the blockchain is valid or not
  */
-async function validateBlockchain(req, res) {
+async function validateBlockchain(_: Request, res: Response): Promise<any> {
   try {
     const result = await Blockchain.validateBlockchain();
     return res.status(200).send(result);
@@ -149,7 +153,7 @@ async function validateBlockchain(req, res) {
  * @apiSuccess {Object} result             Result
  * @apiSuccess {Number} result.blockHeight Block height
  */
-async function getBlockHeight(req, res) {
+async function getBlockHeight(_: Request, res: Response): Promise<any> {
   try {
     const blockHeight = await Blockchain.getBlockHeight();
     return res.status(200).send({ blockHeight });
@@ -178,7 +182,7 @@ async function getBlockHeight(req, res) {
  * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
  * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function getAllBlocks(req, res) {
+async function getAllBlocks(_: Request, res: Response): Promise<IBlock[] | any> {
   try {
     const allBlocks = await Blockchain.getAllBlocks();
     return res.status(200).send(allBlocks);
@@ -187,7 +191,7 @@ async function getAllBlocks(req, res) {
   }
 }
 
-module.exports = {
+export default {
   addStar,
   getByHeight,
   validateBlock,
