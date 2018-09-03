@@ -1,2 +1,4 @@
 node_modules
 blockchainDB
+validationDB
+dist

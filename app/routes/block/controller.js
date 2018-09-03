@@ -1,64 +1,104 @@
 const Blockchain = require('../../models/blockchain');
+const Request = require('../../models/validation');
 
 /**
- * @api {get} /block/:id Request a blcok information
- * @apiName GetBlock
+ * @api {post} /block Add a star registry into blockchain
+ * @apiName AddStar
  * @apiGroup Block
  *
- * @apiParam {Number}      id                      Block height (key)
+ * @apiParam   {String}    address                      Wallet address
+ * @apiParam   {Object}    star                         Star registry object
+ * @apiParam   {String}    star.ra                      Right ascension
+ * @apiParam   {String}    star.dec                     Declination
+ * @apiParam   {String}    star.story                   Story
  *
- * @apiSuccess {Object}    block                   Block information
- * @apiSuccess {String}    block.hash              Block hash
- * @apiSuccess {String}    block.previousBlockHash Previous block's hash
- * @apiSuccess {Number}    block.height            Block height
- * @apiSuccess {String}    block.body              Block body string
- * @apiSuccess {Timestamp} block.time              Block's timestamp of creation
+ * @apiSuccess {Object}    block                        Block information
+ * @apiSuccess {String}    block.hash                   Block hash
+ * @apiSuccess {String}    block.previousBlockHash      Previous block's hash
+ * @apiSuccess {Number}    block.height                 Block height
+ * @apiSuccess {Timestamp} block.time                   Block's timestamp
+ * @apiSuccess {Object}    block.body                   Block body object
+ * @apiSuccess {String}    block.body.address           Wallet address
+ * @apiSuccess {Object}    block.body.star              Star object
+ * @apiSuccess {String}    block.body.star.dec          Declination
+ * @apiSuccess {String}    block.body.star.ra           Right ascension
+ * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
+ * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function getBlock(req, res) {
-  const { id } = req.params;
+async function addStar(req, res) {
+  const { address, star } = req.body;
 
-  if (id === undefined) {
-    return res.status(404).send({ error: 'Cannot find a block without id.' });
+  if (!address || !star) {
+    return res.status(404).send({ error: 'Address and star information are required' });
+  }
+
+  // Check if this address is allowed to register
+  try {
+    const request = await Request.getRequest(address);
+    if (!request.registerStar || !request.status || !request.status.messageSignature) {
+      return res.status(403).send({
+        note: 'Your are not allowed to register a star. Please validate address first.'
+      });
+    }
+  } catch (err) {
+    return res.status(500).send({ error: 'Something went wrong' });
+  }
+
+  // Check if this address is already used to register a star
+  try {
+    const block = await Blockchain.getByAddress(address);
+    if (block) {
+      return res.status(403).send({
+        note: 'Address is already used to register a star.'
+      });
+    }
+  } catch (err) {
+    return res.status(500).send({ error: 'Something went wrong.' });
   }
 
   try {
-    const block = await Blockchain.getBlock(req.params.id);
-    return res.status(200).send(block);
+    const newBlock = await Blockchain.addBlock({ address, star });
+    return res.status(200).send(newBlock);
   } catch (err) {
-    if (/key not found/i.test(err.message)) {
-      return res.status(404).send({ error: `Block (${id}) is not found.` });
-    }
-
     return res.status(500).send({ error: 'Something went wrong.' });
   }
 }
 
 /**
- * @api {post} /block/ Add a block to the blockchain
- * @apiName AddBlock
+ * @api {get} /block/:id Request a blcok information
+ * @apiName GetByHeight
  * @apiGroup Block
  *
- * @apiParam {String}      body                    Block's body string
+ * @apiParam {Number}      id                      Block height (key)
  *
- * @apiSuccess {Object}    block                   Block information
- *
- * @apiSuccess {String}    block.hash              Block hash
- * @apiSuccess {String}    block.previousBlockHash Previous block's hash
- * @apiSuccess {Number}    block.height            Block height
- * @apiSuccess {String}    block.body              Block body string
- * @apiSuccess {Timestamp} block.time              Block's timestamp of creation
+ * @apiSuccess {Object}    block                        Block information
+ * @apiSuccess {String}    block.hash                   Block hash
+ * @apiSuccess {String}    block.previousBlockHash      Previous block's hash
+ * @apiSuccess {Number}    block.height                 Block height
+ * @apiSuccess {Timestamp} block.time                   Block's timestamp
+ * @apiSuccess {Object}    block.body                   Block body object
+ * @apiSuccess {String}    block.body.address           Wallet address
+ * @apiSuccess {Object}    block.body.star              Star object
+ * @apiSuccess {String}    block.body.star.dec          Declination
+ * @apiSuccess {String}    block.body.star.ra           Right ascension
+ * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
+ * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function addBlock(req, res) {
-  const { body } = req.body;
+async function getByHeight(req, res) {
+  const { height } = req.params;
 
-  if (!body) {
-    return res.status(500).send('Cannot add a block without body.');
+  if (height === undefined) {
+    return res.status(404).send({ error: 'Cannot find a block without height.' });
   }
 
   try {
-    const result = await Blockchain.addBlock(body);
-    return res.status(200).send(result);
+    const block = await Blockchain.getByHeight(height);
+    return res.status(200).send(block);
   } catch (err) {
+    if (/key not found/i.test(err.message)) {
+      return res.status(404).send({ error: `Block (height: ${height}) is not found.` });
+    }
+
     return res.status(500).send({ error: 'Something went wrong.' });
   }
 }
@@ -127,13 +167,20 @@ async function getBlockHeight(req, res) {
  * @apiName GetAllBlocks
  * @apiGroup Block
  *
- * @apiSuccess {Object[]}  blocks                   Array of block
+ * @apiSuccess {Object[]}  blocks                       Array of block
  *
- * @apiSuccess {String}    blocks.hash              Block hash
- * @apiSuccess {String}    blocks.previousBlockHash Previous block's hash
- * @apiSuccess {Number}    blocks.height            Block height
- * @apiSuccess {String}    blocks.body              Block body string
- * @apiSuccess {Timestamp} blocks.time              Block's timestamp of creation
+ * @apiSuccess {Object}    block                        Block information
+ * @apiSuccess {String}    block.hash                   Block hash
+ * @apiSuccess {String}    block.previousBlockHash      Previous block's hash
+ * @apiSuccess {Number}    block.height                 Block height
+ * @apiSuccess {Timestamp} block.time                   Block's timestamp
+ * @apiSuccess {Object}    block.body                   Block body object
+ * @apiSuccess {String}    block.body.address           Wallet address
+ * @apiSuccess {Object}    block.body.star              Star object
+ * @apiSuccess {String}    block.body.star.dec          Declination
+ * @apiSuccess {String}    block.body.star.ra           Right ascension
+ * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
+ * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
 async function getAllBlocks(req, res) {
   try {
@@ -145,8 +192,8 @@ async function getAllBlocks(req, res) {
 }
 
 module.exports = {
-  addBlock,
-  getBlock,
+  addStar,
+  getByHeight,
   validateBlock,
   validateBlockchain,
   getBlockHeight,
