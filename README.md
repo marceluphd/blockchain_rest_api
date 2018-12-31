@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/yhagio/blockchain_rest_api.svg?branch=master)](https://travis-ci.org/yhagio/blockchain_rest_api)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/yhagio/blockchain_rest_api/blob/master/LICENSE)
 
 # Blockchain Web Service REST API
 
