@@ -1,8 +1,11 @@
-require('bitcoinjs-lib');
-const bitcoinMessage = require('bitcoinjs-message');
+import { Request, Response } from 'express';
 
-const Validation = require('../../models/validation');
-const { generateTimestamp } = require('../../helpers/helpers');
+import * as bitcoinMessage from 'bitcoinjs-message';
+
+import Validation from '../../models/validation';
+
+import { generateTimestamp } from '../../helpers/helpers';
+import { IValidatedRequest, IValidationRequest } from '../../utils/validation_schema';
 
 /**
  * @api {post} /requestValidation
@@ -19,14 +22,14 @@ const { generateTimestamp } = require('../../helpers/helpers');
  * @apiSuccess {String} res.message          Verification message
  * @apiSuccess {Number} res.validationWindow Remaining time to register
  */
-async function validateRequest(req, res) {
+async function validateRequest(req: Request, res: Response): Promise<any> {
   const { address } = req.body;
   if (!address) {
     return res.status(500).send('Wallet address is required.');
   }
 
   // If the request is already there, reduce the remaining time
-  let requestFound;
+  let requestFound: any;
   try {
     requestFound = await Validation.getRequest(address);
     if (requestFound) {
@@ -67,7 +70,7 @@ async function validateRequest(req, res) {
   const requestTimeStamp = generateTimestamp();
 
   // store this validation request to verify later when validating with signature
-  const validationRequest = {
+  const validationRequest: IValidationRequest = {
     address,
     requestTimeStamp,
     message: `${address}:${requestTimeStamp}:starRegistry`,
@@ -78,10 +81,10 @@ async function validateRequest(req, res) {
     await Validation.saveRequest(validationRequest);
     return res.status(200).send(validationRequest);
   } catch (e) {
+    console.log(e);
     return res.status(500).send({ error: e ? e.message : 'Could not process.' });
   }
 }
-
 
 /**
  * @api {post} /message-signature/validate
@@ -103,15 +106,15 @@ async function validateRequest(req, res) {
  * @apiSuccess {Number}  res.status.validationWindow Remaining time to register
  * @apiSuccess {Boolean} res.status.messageSignature Is signature valid or not
  */
-async function validateMsgSig(req, res) {
+async function validateMsgSig(req: Request, res: Response): Promise<any> {
   const { address, signature } = req.body;
   if (!address || !signature) {
     return res.status(500).send('Both wallet address and signature are required.');
   }
 
   // Get this address's request and if 5 mins passed since the request -> error
-  let request;
-  let timePassed;
+  let request: any;
+  let timePassed: number;
   const now = generateTimestamp();
   try {
     request = await Validation.getRequest(address);
@@ -136,6 +139,7 @@ async function validateMsgSig(req, res) {
     if (/key not found/i.test(e.message)) {
       return res.status(400).send({ error: 'Validation request is not found.' });
     }
+    console.log(e);
     return res.status(500).send({ error: e ? e.message : 'Could not process.' });
   }
 
@@ -144,10 +148,11 @@ async function validateMsgSig(req, res) {
   try {
     verified = bitcoinMessage.verify(request.message, request.address, signature);
   } catch (err) {
+    console.log(err);
     return res.status(500).send({ error: 'Could not process.' });
   }
 
-  const updatedValidationInfo = {
+  const updatedValidationInfo: IValidatedRequest = {
     registerStar: verified,
     status: {
       ...request,
@@ -166,7 +171,7 @@ async function validateMsgSig(req, res) {
   return res.status(200).send(updatedValidationInfo);
 }
 
-module.exports = {
+export default {
   validateRequest,
   validateMsgSig
 };

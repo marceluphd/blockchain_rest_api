@@ -1,5 +1,7 @@
-const Blockchain = require('../../models/blockchain');
+import { Request, Response } from 'express';
 
+import Blockchain from '../../models/blockchain';
+import { IBlock } from '../../utils/block_schema';
 /**
  * @api {get} /stars/hash::hash Request a blcok information
  * @apiName GetByHash
@@ -20,7 +22,7 @@ const Blockchain = require('../../models/blockchain');
  * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
  * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function getByHash(req, res) {
+async function getByHash(req: Request, res: Response): Promise<IBlock | any> {
   const { hash } = req.params;
 
   if (hash === undefined) {
@@ -61,7 +63,7 @@ async function getByHash(req, res) {
  * @apiSuccess {String}    block.body.star.story        Hex encoded Ascii string
  * @apiSuccess {String}    block.body.star.storyDecoded Decoded story
  */
-async function getByAddress(req, res) {
+async function getByAddress(req: Request, res: Response): Promise<IBlock[] | any> {
   const { address } = req.params;
 
   if (address === undefined) {
@@ -69,7 +71,7 @@ async function getByAddress(req, res) {
   }
 
   try {
-    const blocks = await Blockchain.getByAddress(address);
+    const blocks: IBlock[] = await Blockchain.getByAddress(address);
     if (!blocks.length) {
       return res.status(404).send({
         error: `Block (address: ${address}) is not found.`
@@ -85,7 +87,7 @@ async function getByAddress(req, res) {
   }
 }
 
-module.exports = {
+export default {
   getByHash,
   getByAddress
 };

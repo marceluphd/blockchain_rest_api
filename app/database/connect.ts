@@ -1,4 +1,4 @@
-const level = require('level');
+import * as level from 'level';
 
 const blockchainDB = './blockchainDB';
 const db = level(blockchainDB);
@@ -6,7 +6,7 @@ const db = level(blockchainDB);
 const validationDB = './validationDB';
 const rdb = level(validationDB);
 
-module.exports = {
+export default {
   connect: () => db,
   connectValidation: () => rdb
 };
